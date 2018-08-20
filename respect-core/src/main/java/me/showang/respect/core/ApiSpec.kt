@@ -1,6 +1,6 @@
 package me.showang.respect.core
 
-interface RespectApi {
+interface ApiSpec {
 
     companion object {
         const val TIMEOUT_DEFAULT = 3000L

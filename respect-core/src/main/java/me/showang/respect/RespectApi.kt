@@ -1,11 +1,11 @@
-package me.showang.respect.base
+package me.showang.respect
 
 import me.showang.respect.core.ContentType
 import me.showang.respect.core.RequestExecutor
-import me.showang.respect.core.RespectApi
+import me.showang.respect.core.ApiSpec
 import java.util.Collections.emptyMap
 
-abstract class BasicApi<ResultType, ChildType : BasicApi<ResultType, ChildType>> : RespectApi {
+abstract class RespectApi<Result, ChildClass : RespectApi<Result, ChildClass>> : ApiSpec {
 
     override val contentType: String
         get() = ContentType.NONE
@@ -19,7 +19,7 @@ abstract class BasicApi<ResultType, ChildType : BasicApi<ResultType, ChildType>>
     fun start(executor: RequestExecutor,
               tag: Any = this,
               failHandler: (Error) -> Unit = {},
-              successHandler: (ResultType) -> Unit): ChildType {
+              successHandler: (Result) -> Unit): ChildClass {
         executor.request(this, tag, failHandler) {
             try {
                 parse(it).apply {
@@ -28,14 +28,14 @@ abstract class BasicApi<ResultType, ChildType : BasicApi<ResultType, ChildType>>
                     }
                 }
             } catch (e: Error) {
-                failHandler(e)
+                executor.asyncManager.uiThread { failHandler(e) }
             }
         }
         @Suppress("UNCHECKED_CAST")
-        return this as? ChildType ?: throw Error("Child type error.")
+        return this as? ChildClass ?: throw Error("Child type error.")
     }
 
     @Throws(Exception::class)
-    protected abstract fun parse(bytes: ByteArray): ResultType
+    protected abstract fun parse(bytes: ByteArray): Result
 
 }

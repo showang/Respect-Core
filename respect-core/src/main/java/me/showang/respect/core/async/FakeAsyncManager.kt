@@ -1,6 +1,6 @@
 package me.showang.respect.core.async
 
-class SyncManager : AsyncManager {
+class FakeAsyncManager : AsyncManager {
 
     override fun uiThread(runnable: () -> Unit) {
         runnable()

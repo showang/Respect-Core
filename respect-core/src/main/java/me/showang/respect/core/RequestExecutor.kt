@@ -4,7 +4,7 @@ import me.showang.respect.core.async.AsyncManager
 
 interface RequestExecutor {
 
-    fun request(api: RespectApi,
+    fun request(api: ApiSpec,
                 tag: Any = api,
                 failCallback: (error: Error) -> Unit = {},
                 completeCallback: (response: ByteArray) -> Unit)
