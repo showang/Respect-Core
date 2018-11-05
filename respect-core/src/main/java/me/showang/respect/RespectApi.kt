@@ -1,15 +1,13 @@
 package me.showang.respect
 
+import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
+import me.showang.respect.core.ApiSpec
 import me.showang.respect.core.ContentType
 import me.showang.respect.core.RequestExecutor
-import me.showang.respect.core.ApiSpec
 import java.util.Collections.emptyMap
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
-abstract class RespectApi<Result, ChildClass : RespectApi<Result, ChildClass>> : ApiSpec {
+abstract class RespectApi<Result> : ApiSpec {
 
     override val contentType: String
         get() = ContentType.NONE
@@ -20,34 +18,30 @@ abstract class RespectApi<Result, ChildClass : RespectApi<Result, ChildClass>> :
     override val body: ByteArray
         get() = ByteArray(0)
 
-    open fun start(executor: RequestExecutor,
-                   tag: Any = this,
+    private val apiJob = Job()
+    private val apiScope = CoroutineScope(Dispatchers.Main + apiJob)
+
+    fun start(executor: RequestExecutor,
                    failHandler: (Error) -> Unit = {},
-                   successHandler: (Result) -> Unit): ChildClass {
-        executor.request(this, tag, failHandler) {
+                   successHandler: (Result) -> Unit) {
+        apiScope.launch {
             try {
-                parse(it).apply {
-                    executor.asyncManager.uiThread {
-                        successHandler(this)
-                    }
-                }
+                successHandler(suspend(executor))
             } catch (e: Error) {
-                executor.asyncManager.uiThread { failHandler(e) }
+                failHandler(e)
             }
         }
-        @Suppress("UNCHECKED_CAST")
-        return this as? ChildClass ?: throw Error("Child type error.")
     }
 
-    open suspend fun suspend(executor: RequestExecutor): Result = suspendCoroutine { continuation ->
-        start(executor, failHandler = {
-            continuation.resumeWithException(it)
-        }) {
-            continuation.resume(it)
-        }
-    }
+    fun cancel() = apiJob.cancel()
 
-    @Throws(Exception::class)
+    suspend fun suspend(executor: RequestExecutor): Result = suspendParse(executor.request(this))
+
+    @Throws(Error::class)
     protected abstract fun parse(bytes: ByteArray): Result
 
+    @Throws(Error::class)
+    private suspend fun suspendParse(bytes: ByteArray): Result = withContext(IO) {
+        parse(bytes)
+    }
 }
