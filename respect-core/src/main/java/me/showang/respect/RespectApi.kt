@@ -19,12 +19,14 @@ abstract class RespectApi<Result> : ApiSpec {
         get() = ByteArray(0)
 
     private val apiJob = Job()
-    private val apiScope = CoroutineScope(Dispatchers.Main + apiJob)
+    private val apiScope by lazy {
+        CoroutineScope(Dispatchers.Main + apiJob)
+    }
 
-    fun start(executor: RequestExecutor,
-                   failHandler: (Error) -> Unit = {},
-                   successHandler: (Result) -> Unit) {
-        apiScope.launch {
+    fun start(executor: RequestExecutor, scope: CoroutineScope = apiScope,
+              failHandler: (Error) -> Unit = {},
+              successHandler: (Result) -> Unit) {
+        scope.launch {
             try {
                 successHandler(suspend(executor))
             } catch (e: Error) {
