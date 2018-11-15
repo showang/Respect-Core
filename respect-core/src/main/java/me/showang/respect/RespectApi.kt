@@ -3,6 +3,7 @@ package me.showang.respect
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import me.showang.respect.core.*
+import java.lang.Exception
 import java.util.Collections.emptyMap
 
 abstract class RespectApi<Result> : ApiSpec {
@@ -26,7 +27,8 @@ abstract class RespectApi<Result> : ApiSpec {
               successHandler: (Result) -> Unit) {
         scope.launch {
             try {
-                successHandler(suspend(executor))
+                val result = suspend(executor)
+                successHandler(result)
             } catch (e: Error) {
                 failHandler(e)
             }
@@ -38,14 +40,14 @@ abstract class RespectApi<Result> : ApiSpec {
     @Throws(Error::class)
     suspend fun suspend(executor: RequestExecutor): Result = suspendParse(executor.request(this))
 
-    @Throws(Error::class)
+    @Throws(Throwable::class)
     protected abstract fun parse(bytes: ByteArray): Result
 
     @Throws(ParseError::class)
     private suspend fun suspendParse(bytes: ByteArray): Result = withContext(IO) {
         try {
             parse(bytes)
-        } catch (e: Error) {
+        } catch (e: Throwable) {
             throw ParseError(e)
         }
     }
