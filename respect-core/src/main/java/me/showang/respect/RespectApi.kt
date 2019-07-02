@@ -25,27 +25,29 @@ abstract class RespectApi<Result> : ApiSpec {
               failHandler: (Error) -> Unit = {},
               successHandler: (Result) -> Unit) {
         scope.launch {
-            try {
-                successHandler(suspend(executor))
+            val result = try {
+                suspend(executor)
             } catch (e: Error) {
                 failHandler(e)
+                return@launch
             }
+            successHandler(result)
         }
     }
 
     fun cancel() = apiJob.cancel()
 
-    @Throws(Error::class)
+    @Throws(Throwable::class)
     suspend fun suspend(executor: RequestExecutor): Result = suspendParse(executor.request(this))
 
-    @Throws(Error::class)
+    @Throws(Throwable::class)
     protected abstract fun parse(bytes: ByteArray): Result
 
     @Throws(ParseError::class)
     private suspend fun suspendParse(bytes: ByteArray): Result = withContext(IO) {
         try {
             parse(bytes)
-        } catch (e: Error) {
+        } catch (e: Throwable) {
             throw ParseError(e)
         }
     }
