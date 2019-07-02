@@ -25,12 +25,12 @@ abstract class RespectApi<Result> : ApiSpec {
     }
 
     fun start(executor: RequestExecutor, scope: CoroutineScope = apiScope,
-              failHandler: (Error) -> Unit = {},
+              failHandler: (Throwable) -> Unit = {},
               successHandler: (Result) -> Unit) {
         scope.launch {
             val result = try {
                 suspend(executor)
-            } catch (e: Error) {
+            } catch (e: Throwable) {
                 failHandler(e)
                 return@launch
             }
