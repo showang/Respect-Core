@@ -2,7 +2,10 @@ package me.showang.respect
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
-import me.showang.respect.core.*
+import me.showang.respect.core.ApiSpec
+import me.showang.respect.core.ContentType
+import me.showang.respect.core.ParseError
+import me.showang.respect.core.RequestExecutor
 import java.util.Collections.emptyMap
 
 abstract class RespectApi<Result> : ApiSpec {
