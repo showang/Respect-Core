@@ -4,7 +4,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import me.showang.respect.core.ApiSpec
 import me.showang.respect.core.ContentType
-import me.showang.respect.core.ParseError
+import me.showang.respect.core.error.ParseError
 import me.showang.respect.core.RequestExecutor
 import java.util.Collections.emptyMap
 
@@ -39,6 +39,9 @@ abstract class RespectApi<Result> : ApiSpec {
     }
 
     fun cancel() = apiJob.cancel()
+
+    fun isCanceled() = apiJob.isCancelled
+    fun isCompleted() = apiJob.isCompleted
 
     @Throws(Throwable::class)
     suspend fun suspend(executor: RequestExecutor): Result = suspendParse(executor.request(this))
