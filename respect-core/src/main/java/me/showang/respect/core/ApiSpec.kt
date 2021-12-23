@@ -2,10 +2,6 @@ package me.showang.respect.core
 
 interface ApiSpec {
 
-    companion object {
-        const val DEFAULT_TIMEOUT = 3000L
-    }
-
     val url: String
     val httpMethod: HttpMethod
     val contentType: String
@@ -16,6 +12,6 @@ interface ApiSpec {
     val body: ByteArray
 
     val priority: Priority get() = Priority.NORMAL
-    val timeout: Long get() = DEFAULT_TIMEOUT
+    val timeout: Long? get() = null
 
 }
