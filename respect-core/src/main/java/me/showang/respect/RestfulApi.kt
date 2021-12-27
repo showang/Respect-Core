@@ -16,6 +16,8 @@ abstract class RestfulApi<Result> : ApiSpec {
         get() = emptyMap()
     override val urlQueries: Map<String, String>
         get() = emptyMap()
+    override val urlArrayQueries: Map<String, List<String>>
+        get() = emptyMap()
     override val body: ByteArray
         get() = ByteArray(0)
 

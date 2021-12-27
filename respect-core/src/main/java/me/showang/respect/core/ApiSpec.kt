@@ -8,6 +8,7 @@ interface ApiSpec {
 
     val headers: Map<String, String>
     val urlQueries: Map<String, String>
+    val urlArrayQueries: Map<String, List<String>>
 
     val body: ByteArray
 
