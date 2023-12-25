@@ -4,6 +4,7 @@ plugins {
     id 'maven-publish'
 }
 group = 'com.github.showang'
+def version_name = '1.1.0'
 
 android {
     compileSdk 34
@@ -11,7 +12,7 @@ android {
     defaultConfig {
         minSdkVersion 15
         versionCode 1100
-        versionName "1.1.0"
+        versionName version_name
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -33,4 +34,17 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinx_coroutines_version"
 
     testImplementation 'junit:junit:4.13.2'
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = "me.showang.showang"
+                artifactId = "respect-core"
+                version = version_name
+            }
+        }
+    }
 }
