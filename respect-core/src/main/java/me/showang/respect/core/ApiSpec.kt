@@ -1,7 +1,6 @@
 package me.showang.respect.core
 
 interface ApiSpec {
-
     val url: String
     val httpMethod: HttpMethod
     val contentType: String
@@ -14,5 +13,4 @@ interface ApiSpec {
 
     val priority: Priority get() = Priority.NORMAL
     val timeout: Long? get() = null
-
 }

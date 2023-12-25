@@ -1,11 +1,11 @@
 package me.showang.respect.core
 
-import me.showang.respect.core.error.RequestError
+import me.showang.respect.core.error.RequestException
 import java.io.InputStream
 
 interface RequestExecutor {
 
-    @Throws(RequestError::class)
+    @Throws(RequestException::class)
     suspend fun submit(api: ApiSpec): InputStream
 
     fun cancel(api: ApiSpec)

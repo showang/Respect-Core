@@ -5,7 +5,8 @@ import kotlinx.coroutines.withContext
 import me.showang.respect.core.ApiSpec
 import me.showang.respect.core.ContentType
 import me.showang.respect.core.RequestExecutor
-import me.showang.respect.core.error.ParseError
+import me.showang.respect.core.error.ParseException
+import me.showang.respect.core.error.RequestException
 import java.util.Collections.emptyMap
 
 abstract class RestfulApi<Result> : ApiSpec {
@@ -21,18 +22,19 @@ abstract class RestfulApi<Result> : ApiSpec {
     override val body: ByteArray
         get() = ByteArray(0)
 
-    @Throws(Throwable::class, ParseError::class)
+    @Throws(Throwable::class, ParseException::class, RequestException::class)
     open suspend fun request(executor: RequestExecutor): Result = withContext(IO) {
         executor.submit(this@RestfulApi).let {
-            try {
+            runCatching {
                 parse(it.readBytes())
-            } catch (e: Throwable) {
-                throw ParseError(e)
+            }.run {
+                getOrNull()
+                    ?: throw exceptionOrNull()?.let(::ParseException)
+                        ?: IllegalStateException("No result adn no exception")
             }
         }
     }
 
     @Throws(Throwable::class)
     protected abstract fun parse(bytes: ByteArray): Result
-
 }
